@@ -1,13 +1,16 @@
 const KuCoin = require("kucoin-api");
-const eth_db = require("../db/connect/eth_coins_connect.js");
+const eth_db = require("../db/connect/kucoin_connect.js");
 const ETHCoin = require("../db/models/eth_coin.js");
+const Balance = require("../db/models/balance.js");
 
 const CoinList = require("../coins/coin_list.js");
 
+const storeBalance = require("../interface/balance.js");
 const getTickerInfo = require("../interface/ticker.js");
 
 // make the db entry
 // maybe put this directly in cron later
+storeBalance();
 getTickerInfo();
 
 CoinList.map((x) => {
@@ -25,13 +28,14 @@ const analysePrice = (coin) => {
     let high_low_diff = coin.high - coin.low;
     let buy_under = coin.low + (.4*high_low_diff);
     let sell_over = coin.high - (.4*high_low_diff);
-    console.log(coin);
 
+    /*
     console.log("COIN     : " + coin.coin_ticker);
     console.log("BUY UNDER: " + buy_under);
     console.log("SELL OVER: " + sell_over);
     console.log("OIP      : " + coin.order_in_progress);
     console.log("CB       : " + coin.coins_bought);
+    */
 
     coin.lastPrice >= sell_over ?
         sellCoins(coin) :
@@ -44,9 +48,17 @@ const analysePrice = (coin) => {
 }
 
 const buyCoins = (coin) => {
-    console.log("here 3");
     // api here
-    let kc = new KuCoin();
+    let kucoin_api = new KuCoin();
+    let can_spend = 0;
+    let myBalance = Balance.find({balance_ticker: "ETH"});
+    myBalance.then((x, err) => {
+        can_spend = x[0].amt * .05;
+    })
+
+    // to do tomorrow
+    // add pairings to coin model
+    // add order learning to outbid others
 
     /*
     kc.createOrder({
@@ -58,7 +70,6 @@ const buyCoins = (coin) => {
 }
 
 const sellCoins = (coin) => {
-    console.log("here 3");
     // api here
 
     console.log("Sell " + coin.coin_ticker + " @ " + coin.lastPrice);

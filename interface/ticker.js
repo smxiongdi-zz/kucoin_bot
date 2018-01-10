@@ -1,4 +1,4 @@
-const eth_db = require("../db/connect/eth_coins_connect.js");
+const eth_db = require("../db/connect/kucoin_connect.js");
 const ETHCoin = require("../db/models/eth_coin.js");
 const KCTicker = require("../api/kucoin/ticker.js");
 const PairList = require("../coins/pair_list.js");
