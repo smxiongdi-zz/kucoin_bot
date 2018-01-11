@@ -67,10 +67,14 @@ const executeSell = (ticker, amount, price) => {
     //    console.log("Sell " + ticker + " @ " + price + " " + amount + " units");
     let myCoin = KCoin.find({ticker: ticker});
     myCoin.then((x, err) => {
-        if(x[0].bought_price < price) {
+        if(x.length > 0) {
+            if(x[0].bought_price > price) {
+                console.log("don't sell");
+            } else {
+                KCTrade(ticker, amount, price - .000001, "SELL");
+            }
+        } else {
             KCTrade(ticker, amount, price - .000001, "SELL");
-            x[0].bought_price = 0;
-            x[0].save();
         }
     })
 }

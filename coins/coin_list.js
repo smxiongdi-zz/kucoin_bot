@@ -22,6 +22,9 @@ module.exports =
     {ticker: "AION", low: 0.4, high: 0.4},
     {ticker: "ONION", low: 0.4, high: 0.4},
 
+    {ticker: "REQ", low: 0.4, high: 0.4},
+    {ticker: "QTUM", low: 0.4, high: 0.4},
+    {ticker: "MTH", low: 0.4, high: 0.4},
     {ticker: "NEO", low: 0.4, high: 0.4},
     {ticker: "VEN", low: 0.4, high: 0.4},
     {ticker: "MOD", low: 0.4, high: 0.4},
