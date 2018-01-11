@@ -1,9 +1,13 @@
+// apis
 const CoinList = require("../coins/coin_list.js");
 const KCActive = require("../api/kucoin/active.js");
 const KCBalance = require("../api/kucoin/balance.js");
 const KCTicker = require("../api/kucoin/ticker.js");
-
 const KCTrade = require("../api/kucoin/trade.js");
+
+// db/models
+const kucoin_db = require("../db/connect/kucoin_connect.js");
+const KCoin = require("../db/models/eth_coin");
 
 
 CoinList.map((x) => {
@@ -40,8 +44,8 @@ const checkTrade = (ticker) => {
                 response => {
                     unit_amt = can_spend / response.data.lastDealPrice;
                     let diff = response.data.high - response.data.low;
-                    let sell_over = response.data.high - (.4*diff);
-                    let buy_under = response.data.low + (.4*diff);
+                    let sell_over = response.data.high - (.3*diff);
+                    let buy_under = response.data.low + (.3*diff);
                     KCBalance(ticker).then(
                         trading => {
                             if(response.data.lastDealPrice <= buy_under) {
@@ -61,10 +65,27 @@ const checkTrade = (ticker) => {
 
 const executeSell = (ticker, amount, price) => {
     //    console.log("Sell " + ticker + " @ " + price + " " + amount + " units");
-    KCTrade(ticker, amount, price, "SELL");
+    let myCoin = KCoin.find({ticker: ticker});
+    myCoin.then((x, err) => {
+        if(x[0].bought_price < price) {
+            KCTrade(ticker, amount, price - .000001, "SELL");
+            x[0].bought_price = 0;
+            x[0].save();
+        }
+    })
 }
 
 const executeBuy = (ticker, amount, price) => {
     //    console.log("Buy " + ticker + " @ " + price + " " + amount + " units");
-    KCTrade(ticker, amount, price, "BUY");
+    let myCoin = KCoin.find({ticker: ticker});
+    myCoin.then((x, err) => {
+        if(x.length > 0) {
+            x[0].bought_price = price;
+            x[0].save();
+        } else {
+            myCoin = new KCoin({ticker: ticker, bought_price: price});
+            myCoin.save();
+        }
+        KCTrade(ticker, amount, price + .000001, "BUY");
+    })
 }

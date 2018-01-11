@@ -11,7 +11,7 @@ const KCTrade = (ticker, amount, price, ordertype) => {
     return kucoin_api.createOrder({
         pair: ticker + "-ETH",
         amount: amount.toFixed(4) - .0001,
-        price: price,
+        price: price.toFixed(6),
         type: ordertype
     }).then(console.log).catch(console.error)
 }
