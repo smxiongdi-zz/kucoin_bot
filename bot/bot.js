@@ -1,56 +1,65 @@
 const CoinList = require("../coins/coin_list.js");
+const KCActive = require("../api/kucoin/active.js");
 const KCBalance = require("../api/kucoin/balance.js");
 const KCTicker = require("../api/kucoin/ticker.js");
 
+const KCTrade = require("../api/kucoin/trade.js");
+
 
 CoinList.map((x) => {
+    KCBalance(x.ticker).then(
+        response => {
+            checkActive(x.ticker, response.data.balance)
+        }
+    )
 
 })
 
-const buyCoins = (coin) => {
-    // api here
-    let kucoin_api = new KuCoin();
+const checkActive = (ticker, balance) => {
+    console.log("In active");
+    KCActive(ticker+"-ETH").then(
+        response => {
+            if(response.data.SELL.length == 0 && response.data.BUY.length == 0) {
+                // do not execute trade
+                checkTrade(ticker);
+            }
+        }
+    )
+}
+
+const checkTrade = (ticker) => {
     let can_spend = 0;
-    let myBalance = Balance.find({balance_ticker: "ETH"});
-    myBalance.then((x, err) => {
-        can_spend = x[0].amt * .01;
-        console.log("Spend AMT: " + can_spend);
-        console.log("Units    : " + can_spend/coin.lastPrice)
+    let unit_amt = 0;
 
-        kucoin_api.createOrder({
-            pair: coin.coin_ticker + "-" + x[0].balance_ticker,
-            amount: can_spend/coin.lastPrice,
-            price: coin.lastPrice,
-            type: "BUY"
-        }).then((x, error) => {
-            // mark as bought / order in progress
-            coin.coins_bought = true;
-            coin.save();
-
-            createBalance(coin.coin_ticker, can_spend/coin.lastPrice);
-        })
-
-    })
-
-
-
-    console.log("Buy " + coin.coin_ticker + " @ " + coin.lastPrice);
+    KCBalance("ETH").then(
+        response => {
+            // get our ticker info here
+            // small eth amount for testing
+            can_spend = response.data.balance * 0.01;
+            // only ETH enabled currently
+            KCTicker(ticker+"-ETH").then(
+                response => {
+                    unit_amt = can_spend / response.data.lastDealPrice;
+                    let diff = response.data.high - response.data.low;
+                    let sell_over = response.data.high - (.4*diff);
+                    let buy_under = response.data.low + (.4*diff);
+                    if(response.data.lastDealPrice <= buy_under) {
+                        executeBuy(ticker, unit_amt, response.data.lastDealPrice);
+                    } else if(response.data.lastDealPrice >= sell_over) {
+                        executeSell(ticker, unit_amt, response.data.lastDealPrice);
+                    }
+                }
+            )
+        }
+    )
 }
 
-const sellCoins = (coin) => {
-    // api here
-
-    console.log("Sell " + coin.coin_ticker + " @ " + coin.lastPrice);
-    kucoin_api.createOrder({
-        pair: coin.coin_ticker + "-" + x[0].balance_ticker,
-        amount: can_spend/coin.lastPrice,
-        price: coin.lastPrice,
-        type: "SELL"
-    }).then((x, error) => {
-        // mark as bought / order in progress
-        coin.coins_bought = false;
-        coin.save();
-    })
-
+const executeSell = (ticker, amount, price) => {
+    console.log("Sell " + ticker + " @ " + price + " " + amount + " units");
+    //    KCTrade(ticker, amount, price, "SELL");
 }
 
+const executeBuy = (ticker, amount, price) => {
+    console.log("Buy " + ticker + " @ " + price + " " + amount + " units");
+    //    KCTrade(ticker, amount, price, "BUY");
+}
