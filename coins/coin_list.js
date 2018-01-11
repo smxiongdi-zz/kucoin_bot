@@ -1,7 +1,7 @@
 module.exports =
 [
-    {coin: "DRGN", low: 0.4, high: 0.3},
-    {coin: "QLC", low: 0.4, high: 0.4},
-    {coin: "SNOV", low: 0.4, high: 0.3},
-    {coin: "DBC", low: 0.3, high: 0.45},
+    {ticker: "DRGN", low: 0.4, high: 0.3},
+    {ticker: "QLC", low: 0.4, high: 0.4},
+    {ticker: "SNOV", low: 0.4, high: 0.3},
+    {ticker: "DBC", low: 0.3, high: 0.45},
 ]
