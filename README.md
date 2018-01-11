@@ -19,8 +19,8 @@ to do
 add better price determinations based on the kucoin api
 e.g. lower interval price fluctuation calculations
 
-add orderbook evaluations on sell/buy walls to beat whales selling off</br>
-this helpfully prevents stalling on the ordering
+add orderbook evaluations on sell/buy walls to beat whales selling off
+this helpfully prevents stalling on the ordering</br>
 outbid for buys / underbid for sales by .0001 sats on existing orderbooks once an acceptable price is reached, to sell off more quickly
 
 implement the buy/sell api to start experimentally trading small amounts once the above is complete
