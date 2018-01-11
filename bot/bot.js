@@ -16,7 +16,6 @@ CoinList.map((x) => {
 })
 
 const checkActive = (ticker, balance) => {
-    console.log("In active");
     KCActive(ticker+"-ETH").then(
         response => {
             if(response.data.SELL.length == 0 && response.data.BUY.length == 0) {
@@ -43,11 +42,17 @@ const checkTrade = (ticker) => {
                     let diff = response.data.high - response.data.low;
                     let sell_over = response.data.high - (.4*diff);
                     let buy_under = response.data.low + (.4*diff);
-                    if(response.data.lastDealPrice <= buy_under) {
-                        executeBuy(ticker, unit_amt, response.data.lastDealPrice);
-                    } else if(response.data.lastDealPrice >= sell_over) {
-                        executeSell(ticker, unit_amt, response.data.lastDealPrice);
-                    }
+                    KCBalance(ticker).then(
+                        trading => {
+                            if(response.data.lastDealPrice <= buy_under) {
+                                trading.data.balance == 0 ?
+                                    executeBuy(ticker, unit_amt, response.data.lastDealPrice) : ''
+                            } else if(response.data.lastDealPrice >= sell_over) {
+                                trading.data.balance > 0 ?
+                                    executeSell(ticker, trading.data.balance, response.data.lastDealPrice) : ''
+                            }
+                        }
+                    )
                 }
             )
         }
@@ -55,11 +60,11 @@ const checkTrade = (ticker) => {
 }
 
 const executeSell = (ticker, amount, price) => {
-    console.log("Sell " + ticker + " @ " + price + " " + amount + " units");
-    //    KCTrade(ticker, amount, price, "SELL");
+    //    console.log("Sell " + ticker + " @ " + price + " " + amount + " units");
+    KCTrade(ticker, amount, price, "SELL");
 }
 
 const executeBuy = (ticker, amount, price) => {
-    console.log("Buy " + ticker + " @ " + price + " " + amount + " units");
-    //    KCTrade(ticker, amount, price, "BUY");
+    //    console.log("Buy " + ticker + " @ " + price + " " + amount + " units");
+    KCTrade(ticker, amount, price, "BUY");
 }
